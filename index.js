@@ -46,7 +46,7 @@ app.get('/api/get_blog/:blog_id',(req,res,next)=>{
 
         let blog = blogPosts.filter((e)=>e.id === Number(requestedId.blog_id));
 
-        console.log('bb',blog);
+        // console.log('bb',blog);
         
         res.status(200).json({
             'message' :'Fetch specific blog',
@@ -100,7 +100,7 @@ app.get('/api/get_blog/:blog_id',(req,res,next)=>{
         
                 // let blog = blogPosts.filter((e)=>e.id === Number(requestedId.blog_id));
         
-                console.log('bb',blog);
+                // console.log('bb',blog);
                 
                 res.status(200).json({
                     'message' :'Blog delete sucess',
