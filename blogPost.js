@@ -147,28 +147,76 @@ let  blogPosts = [
 
     // console.log(blogPosts[0]);
 
-const addBlog = (blogs)=>{
-    try{
-      console.log('dddddddddddd',blogs);
+// const addBlog = (blogs)=>{
+//     try{
+//       console.log('dddddddddddd',blogs);
+
+//       const blogPosts = blogPosts
       
-        const addBlog = blogPosts.push(blogs);
+//         const addBlog = blogPosts.push(blogs);
 
-        console.log('asdddd',blogPosts);
+//         console.log('asdddd',blogPosts);
         
-        return blogPosts;
+//         return addBlog;
 
-    }catch(e){
-        console.log('erro while add the blogs',e)
-    }
+//     }catch(e){
+//         console.log('erro while add the blogs',e)
+//     }
 
-}
+// }
 
-console.log('tot',blogPosts.length);
+// console.log('tot',blogPosts.length);
 
-  
-  module.exports ={
-    blogPosts,
-    addBlog
+
+const addBlog = (blog) => {
+  try {
+      // blog.id = blogPosts.length ? blogPosts[blogPosts.length - 1].id + 1 : 1;  // Auto-increment ID
+      blogPosts.push(blog);
+      return blog;
+  } catch (e) {
+      console.log('Error while adding the blog:', e);
+      return null;
   }
+};
+
+// Delete a blog by ID
+const deleteBlog = (blog_id) => {
+  try {
+      const index = blogPosts.findIndex(item => item.id === blog_id);
+      if (index === -1) return false;
+
+      blogPosts.splice(index, 1);
+      return true;
+  } catch (e) {
+      console.log('Error while deleting the blog:', e);
+      return false;
+  }
+};
+
+
+const updateBlog = (blog_id, updatedData) => {
+  try {
+    const index = blogPosts.findIndex((item) => item.id === blog_id);
+    if (index === -1) return null; // Blog not found
+
+    // Update the blog properties
+    blogPosts[index] = { ...blogPosts[index], ...updatedData };
+
+    return blogPosts[index]; // Return updated blog
+  } catch (e) {
+    console.log("Error while updating the blog:", e);
+    return null;
+  }
+};
+
+
+module.exports = {
+  blogPosts,
+  addBlog,
+  deleteBlog,
+  updateBlog
+};
+
+
 
   

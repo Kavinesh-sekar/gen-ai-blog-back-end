@@ -2,17 +2,14 @@ const express = require('express');
 const app = express();
 const dotenv = require('dotenv');
 const cors = require('cors');
-const {blogPosts,addBlog} = require('./blogPost');
+const { blogPosts, addBlog, deleteBlog ,updateBlog} = require('./blogPost');
+
 dotenv.config();
 
 let port = process.env.PORT || 5000;
 
 app.use(cors());
-
 app.use(express.json());
-
-// console.log('bb',blogPosts);
-
 
 app.use((err, req, res, next) => {
     console.error('Error:', err);
@@ -23,94 +20,117 @@ app.use((err, req, res, next) => {
     });
 });
 
-
-app.get('/api/get_all_blog',(req,res,next)=>{
-try{
-    
-    res.status(200).json({
-     'message' :'Fetch All blog',
-        'data':blogPosts
-    })
-}catch(err){
-   next(err);
-}
-})
-
-app.get('/api/get_blog/:blog_id',(req,res,next)=>{
-    try{
-
-        let requestedId = req.params;
-
-        console.log('requestedId',requestedId);
-        
-
-        let blog = blogPosts.filter((e)=>e.id === Number(requestedId.blog_id));
-
-        // console.log('bb',blog);
-        
+// Fetch all blogs
+app.get('/api/get_all_blog', (req, res, next) => {
+    try {
         res.status(200).json({
-            'message' :'Fetch specific blog',
-            'data':blog
-        })
-    }catch(err){
-       next(err);
+            message: 'Fetch All blog',
+            data: blogPosts
+        });
+    } catch (err) {
+        next(err);
     }
-    })
-
-    app.post('/api/create_blog',(req,res,next)=>{
-        try{
-
-            let {blogData} = req.body
-
-            console.log('rrrrrrrrr',req.body);
+});
 
 
-            let a = addBlog(req.body);
+app.get('/api/get_blog/:blog_id', (req, res, next) => {
+    try {
+        let blog_id = Number(req.params.blog_id);
+        let blog = blogPosts.find(e => e.id === blog_id);
 
-            
-
-            console.log('aaaaaaa',a);
-            
-            
-            res.status(200).json({
-             'message' :'Fetch All blog',
-                'data':blogPosts
-            })
-        }catch(err){
-           next(err);
+        if (!blog) {
+            return res.status(404).json({
+                message: 'Blog not found',
+                data: null
+            });
         }
-        })
 
+        res.status(200).json({
+            message: 'Fetch specific blog',
+            data: blog
+        });
+    } catch (err) {
+        next(err);
+    }
+});
 
-        app.delete('/api/delete_blog/:blog_id',(req,res,next)=>{
-            try{
-        
-                let requestedId = req.params;
-        
-                console.log('requestedId',requestedId);
-                
-                const index = blogPosts.findIndex(item => item.id === Number(requestedId) );
+// Create a new blog
+app.post('/api/create_blog', (req, res, next) => {
+    try {
+        let newBlog = req.body;
 
-                    if (index !== -1) {
-                        blogPosts.splice(index, 1); 
-                    }
+        if (!newBlog || !newBlog.title || !newBlog.content) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid blog data'
+            });
+        }
 
-                    console.log('fffffff',blogPosts.length);
-                    
-        
-                // let blog = blogPosts.filter((e)=>e.id === Number(requestedId.blog_id));
-        
-                // console.log('bb',blog);
-                
-                res.status(200).json({
-                    'message' :'Blog delete sucess',
-                    'data':[]
-                })
-            }catch(err){
-               next(err);
-            }
-            })
+        let addedBlog = addBlog(newBlog);
 
-app.listen(port,()=>{
-    console.log(`server running port ${port}`)
-})  
+        res.status(201).json({
+            message: 'Blog created successfully',
+            data: addedBlog
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// Delete a blog by ID
+app.delete('/api/delete_blog/:blog_id', (req, res, next) => {
+    try {
+        let blog_id = Number(req.params.blog_id);
+        let deleted = deleteBlog(blog_id);
+
+        if (!deleted) {
+            return res.status(404).json({
+                message: 'Blog not found or already deleted'
+            });
+        }
+
+        res.status(200).json({
+            message: 'Blog deleted successfully',
+            data: blogPosts
+        });
+    } catch (err) {
+        next(err);
+    }
+});
+
+app.put("/api/update_blogs/:blog_id", (req, res, next) => {
+    try {
+      const blog_id = parseInt(req.params.blog_id); 
+      const updatedData = req.body;
+  
+      if (!updatedData || !updatedData.title || !updatedData.content) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid blog data",
+        });
+      }
+  
+      const updatedBlog = updateBlog(blog_id, updatedData);
+  
+      if (!updatedBlog) {
+        return res.status(404).json({
+          success: false,
+          message: "Blog not found",
+        });
+      }
+  
+      res.status(200).json({
+        success: true,
+        message: "Blog updated successfully",
+        data: updatedBlog,
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+  
+
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
